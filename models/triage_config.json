@@ -1,0 +1,24 @@
+{
+    "model_architecture": "RandomForestClassifier",
+    "n_estimators": 150,
+    "max_depth": 4,
+    "optimal_threshold": 0.31,
+    "standard_threshold": 0.5,
+    "cost_fn_ratio": 5.0,
+    "clinical_urgency_rule": "Risk probability >= 0.31 -> URGENT CARDIOLOGY ESCALATION",
+    "features": [
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal"
+    ]
+}
