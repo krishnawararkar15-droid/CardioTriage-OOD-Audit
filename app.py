@@ -6,7 +6,7 @@ Designed specifically for community triage nurses and frontline providers
 at understaffed rural health centers lacking immediate on-site cardiologists.
 Implements asymmetric cost-sensitive triage (tau* = 0.31) to eliminate false negatives.
 
-Theme: Minimalist Black, Crisp White & Emerald Green Gradients with Intense Glassmorphism.
+Design System: Minimalist Pure Black & Crisp White Monochrome with Intense Glassmorphism.
 """
 
 import os
@@ -30,9 +30,6 @@ TAU_OPT = float(config["optimal_threshold"])  # 0.31
 TAU_STD = 0.50
 FEATURES = config["features"]
 
-# Load feature importances for rapid clinical factor attribution
-feat_imp = pd.read_csv(os.path.join(MODELS_DIR, "feature_importances_rf.csv")).set_index("feature")["importance"].to_dict()
-
 
 def predict_cardiac_triage(
     age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal
@@ -41,11 +38,10 @@ def predict_cardiac_triage(
     Executes cost-sensitive triage on patient clinical parameters.
     Returns:
     - HTML Triage Badge & Action Protocol
-    - Risk Gauge Score (%)
+    - Risk Score (%)
     - Model Comparison Matrix
     - Key Risk Factor Attribution
     """
-    # 1. Parse Inputs to Standard Clinical Schema
     sex_val = 1.0 if sex == "Male" else 0.0
     
     cp_map = {
@@ -83,7 +79,7 @@ def predict_cardiac_triage(
     }
     thal_val = thal_map.get(thal, 3.0)
 
-    # 2. Construct Patient Feature DataFrame
+    # Patient Feature DataFrame
     patient_data = pd.DataFrame([{
         "age": float(age),
         "sex": sex_val,
@@ -100,603 +96,766 @@ def predict_cardiac_triage(
         "thal": thal_val
     }])[FEATURES]
 
-    # 3. Model Inference
+    # Model Inference
     risk_prob = float(rf_model.predict_proba(patient_data)[:, 1][0])
     risk_pct = risk_prob * 100
 
-    # 4. Asymmetric Triage Decision
+    # Asymmetric Triage Decision
     is_urgent_cardiotriage = (risk_prob >= TAU_OPT)
     is_urgent_standard = (risk_prob >= TAU_STD)
 
-    # 5. Build Triage Badge HTML with Intense Glassmorphism
+    # 1. Clean Monochrome Glassmorphism Triage Card
     if is_urgent_cardiotriage:
         triage_html = f"""
-        <div class="glass-card triage-urgent">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 24px;">🚨</span>
-                    <h2 style="color: #f87171; margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.3px;">
-                        URGENT: IMMEDIATE CARDIOLOGY ESCALATION
-                    </h2>
+        <div class="glass-result-card urgent-border">
+            <div class="result-header">
+                <div>
+                    <span class="status-pill urgent-pill">URGENT ESCALATION REQUIRED</span>
+                    <h2 class="result-title">Immediate Secondary Cardiology Transfer</h2>
                 </div>
-                <span class="badge-urgent-pill">
-                    {risk_pct:.1f}% Risk Score
-                </span>
+                <div class="risk-gauge-box">
+                    <span class="risk-number">{risk_pct:.1f}%</span>
+                    <span class="risk-label">CARDIAC RISK</span>
+                </div>
             </div>
-            <p style="margin: 12px 0 6px 0; color: #fef2f2; font-size: 14.5px; font-weight: 600;">
-                Clinical Priority: <span style="color: #f87171;">HIGH RISK (Emergency Transfer Indicated)</span>
-            </p>
-            <hr style="border: 0; border-top: 1px solid rgba(239, 68, 68, 0.25); margin: 12px 0;">
-            <div style="color: #fca5a5; font-size: 13.5px; line-height: 1.6;">
-                <strong style="color: #ffffff;">Frontline Nursing Emergency Protocol:</strong><br>
-                1. <strong>ECG Telemetry:</strong> Initiate continuous 12-lead ECG telemetry & continuous SpO2 monitoring immediately.<br>
-                2. <strong>Vascular Access & Labs:</strong> Secure two large-bore peripheral IV lines; draw urgent cardiac troponins.<br>
-                3. <strong>Antiplatelet Loading:</strong> Administer chewable Aspirin (325mg) immediately if no active hemorrhage.<br>
-                4. <strong>Transfer Dispatch:</strong> Contact emergency paramedic transport for transfer to nearest cardiac catheterization center.
+            
+            <div class="protocol-box">
+                <div class="protocol-title">MANDATORY EMERGENCY NURSE PROTOCOL</div>
+                <ol class="protocol-list">
+                    <li><strong>Continuous Telemetry:</strong> Immediately initiate 12-lead continuous ECG telemetry and pulse oximetry.</li>
+                    <li><strong>Vascular Access & Labs:</strong> Establish two 18-gauge peripheral IV access lines; draw STAT troponin biomarkers.</li>
+                    <li><strong>Antiplatelet Administration:</strong> Administer 325 mg chewable aspirin if no active bleeding or severe allergy.</li>
+                    <li><strong>Transfer Dispatch:</strong> Alert regional paramedic dispatch for emergent transfer to cath-capable tertiary center.</li>
+                </ol>
             </div>
         </div>
         """
     else:
         triage_html = f"""
-        <div class="glass-card triage-routine">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 24px;">✅</span>
-                    <h2 style="color: #34d399; margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.3px;">
-                        ROUTINE: NON-EMERGENT FOLLOW-UP
-                    </h2>
+        <div class="glass-result-card routine-border">
+            <div class="result-header">
+                <div>
+                    <span class="status-pill routine-pill">ROUTINE AMBULATORY STATUS</span>
+                    <h2 class="result-title">Non-Emergent Outpatient Management</h2>
                 </div>
-                <span class="badge-routine-pill">
-                    {risk_pct:.1f}% Risk Score
-                </span>
+                <div class="risk-gauge-box">
+                    <span class="risk-number">{risk_pct:.1f}%</span>
+                    <span class="risk-label">CARDIAC RISK</span>
+                </div>
             </div>
-            <p style="margin: 12px 0 6px 0; color: #f0fdf4; font-size: 14.5px; font-weight: 600;">
-                Clinical Priority: <span style="color: #34d399;">LOW / MODERATE RISK (Outpatient Protocol)</span>
-            </p>
-            <hr style="border: 0; border-top: 1px solid rgba(16, 185, 129, 0.25); margin: 12px 0;">
-            <div style="color: #d1fae5; font-size: 13.5px; line-height: 1.6;">
-                <strong style="color: #ffffff;">Frontline Nursing Protocol:</strong><br>
-                1. Patient vitals are within acceptable non-emergent ambulatory limits.<br>
-                2. Coordinate outpatient treadmill stress testing or echocardiography within 14–30 days.<br>
-                3. Review lifestyle recommendations, blood pressure diary, and lipid panel management.<br>
-                4. Educate patient on cardiac red flags (crushing retrosternal pressure, syncope) requiring immediate ER return.
+            
+            <div class="protocol-box">
+                <div class="protocol-title">STANDARD AMBULATORY CLINICAL PROTOCOL</div>
+                <ol class="protocol-list">
+                    <li><strong>Stable Hemodynamics:</strong> Patient vitals remain within safe non-emergent ambulatory limits.</li>
+                    <li><strong>Outpatient Diagnostic Referral:</strong> Schedule elective echocardiogram or exercise treadmill evaluation within 14–30 days.</li>
+                    <li><strong>Preventive Counseling:</strong> Review dietary lipid management, smoking cessation, and home blood pressure logging.</li>
+                    <li><strong>Discharge Red Flags:</strong> Provide written discharge instructions on emergency red flags (radiating crushing chest pressure).</li>
+                </ol>
             </div>
         </div>
         """
 
-    # 6. Safety Comparison Banner (Highlighting Rescued Missed Patients)
+    # 2. Model Consensus & Safety Audit
     if is_urgent_cardiotriage and not is_urgent_standard:
         comparison_html = f"""
-        <div class="glass-card rescue-banner">
-            <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #fbbf24; font-size: 14.5px;">
-                <span>⚡</span> CLINICAL SAFETY ALERT: RESCUED FALSE NEGATIVE
-            </div>
-            <div style="color: #fef3c7; font-size: 13.5px; margin-top: 8px; line-height: 1.55;">
-                A standard AI model with an uncalibrated 50% cutoff would have classified this patient as 
-                <strong style="color: #ffffff;">'LOW RISK' ({risk_pct:.1f}%)</strong> and sent them home with a fatal missed diagnosis. 
-                <strong>CardioTriage's 5:1 clinical loss threshold (&tau;* = {TAU_OPT:.2f})</strong> successfully caught and escalated this patient, saving a life.
+        <div class="glass-audit-card highlight-border">
+            <div class="audit-badge">SAFETY RESCUE ALERT • 5:1 CLINICAL ASYMMETRY</div>
+            <div class="audit-heading">Standard AI Missed Case Rescued by CardioTriage</div>
+            <div class="audit-body">
+                A conventional machine learning classifier operating at the standard 50% cutoff categorized this patient as 
+                <strong>'HEALTHY' ({risk_pct:.1f}%)</strong> and would have mistakenly discharged them home. 
+                CardioTriage's calibrated safety threshold (<strong>&tau;* = {TAU_OPT:.2f}</strong>) successfully caught this borderline ischemia, 
+                eliminating a fatal diagnostic delay.
             </div>
         </div>
         """
     elif is_urgent_cardiotriage and is_urgent_standard:
-        comparison_html = """
-        <div class="glass-card consensus-banner">
-            <div style="color: #34d399; font-weight: 700; font-size: 14px; margin-bottom: 4px;">
-                🎯 Unanimous Escalation Consensus
-            </div>
-            <div style="color: #e2e8f0; font-size: 13px; line-height: 1.5;">
-                Both conventional AI (&tau; = 0.50) and CardioTriage (&tau;* = 0.31) strongly agree this patient is high risk and requires immediate cardiology escalation.
+        comparison_html = f"""
+        <div class="glass-audit-card">
+            <div class="audit-badge">FULL MODEL CONCURRENCE</div>
+            <div class="audit-heading">Unanimous High Risk Stratification</div>
+            <div class="audit-body">
+                Both standard machine learning (&tau; = 0.50) and CardioTriage (&tau;* = 0.31) concur that this patient's acute ischemic risk ({risk_pct:.1f}%) warrants immediate emergency cardiology escalation.
             </div>
         </div>
         """
     else:
-        comparison_html = """
-        <div class="glass-card consensus-banner">
-            <div style="color: #10b981; font-weight: 700; font-size: 14px; margin-bottom: 4px;">
-                🤝 Unanimous Ambulatory Consensus
-            </div>
-            <div style="color: #e2e8f0; font-size: 13px; line-height: 1.5;">
-                Both models concur that acute ischemic risk is low. Emergency transfer is not indicated; proceed with standard primary care follow-up.
+        comparison_html = f"""
+        <div class="glass-audit-card">
+            <div class="audit-badge">FULL MODEL CONCURRENCE</div>
+            <div class="audit-heading">Unanimous Low Risk Stratification</div>
+            <div class="audit-body">
+                Both models agree that acute ischemic risk ({risk_pct:.1f}%) is low. Routine outpatient care is clinically appropriate.
             </div>
         </div>
         """
 
-    # 7. Local Factor Attribution Breakdown
+    # 3. Top Diagnostic Risk Drivers
     factors = []
     if oldpeak >= 1.5:
-        factors.append(f"<strong style='color: #f87171;'>Significant ST Depression ({oldpeak:.1f} mm):</strong> Severe marker of exercise-induced subendocardial ischemia.")
+        factors.append(f"<strong>ST Depression ({oldpeak:.1f} mm):</strong> Severe exercise-induced subendocardial ischemic response.")
     if cp_val == 4.0:
-        factors.append("<strong style='color: #f87171;'>Asymptomatic / Silent Presentation:</strong> Treacherous presentation; strongly correlates with multi-vessel disease.")
+        factors.append("<strong>Silent Ischemia / Asymptomatic:</strong> Treacherous presentation strongly associated with multi-vessel CAD.")
     if ca_val >= 1.0:
-        factors.append(f"<strong style='color: #f87171;'>Fluoroscopy Calcification ({int(ca_val)} vessels):</strong> Major anatomical confirmation of coronary arterial narrowing.")
+        factors.append(f"<strong>Fluoroscopy Stenosis ({int(ca_val)} vessels):</strong> Major anatomical confirmation of coronary arterial obstruction.")
     if thal_val == 7.0:
-        factors.append("<strong style='color: #f87171;'>Reversible Thallium Perfusion Defect:</strong> Confirms viable but ischemic myocardium under cardiac demand.")
+        factors.append("<strong>Reversible Thallium Defect:</strong> Confirms viable but ischemic myocardium under hemodynamic stress.")
     if exang_val == 1.0:
-        factors.append("<strong style='color: #f87171;'>Exercise-Induced Angina:</strong> Direct clinical sign of myocardial oxygen supply-demand deficit.")
+        factors.append("<strong>Exercise-Induced Angina:</strong> Diagnostic evidence of myocardial oxygen supply/demand mismatch.")
     if thalach < 120.0:
-        factors.append(f"<strong style='color: #fbbf24;'>Chronotropic Incompetence (Max HR: {int(thalach)} bpm):</strong> Inability to reach physiologic heart rate under workload.")
+        factors.append(f"<strong>Chronotropic Incompetence ({int(thalach)} bpm):</strong> Inability to reach expected physiologic heart rate.")
     if trestbps >= 140.0:
-        factors.append(f"<strong style='color: #fbbf24;'>Stage 2 Hypertension ({int(trestbps)} mmHg):</strong> Increases vascular shear stress and plaque rupture risk.")
+        factors.append(f"<strong>Hypertension ({int(trestbps)} mmHg):</strong> Increases coronary vascular shear stress and plaque vulnerability.")
     if chol >= 260.0:
-        factors.append(f"<strong style='color: #fbbf24;'>Elevated Serum Cholesterol ({int(chol)} mg/dl):</strong> Long-term atherogenic substrate.")
+        factors.append(f"<strong>Hypercholesterolemia ({int(chol)} mg/dl):</strong> Elevated long-term atherogenic substrate.")
 
     if not factors:
-        factors.append("<strong style='color: #34d399;'>Stable Hemodynamic Baseline:</strong> No acute ischemic or electrophysiological red flags detected.")
+        factors.append("<strong>Normal Baseline Parameters:</strong> No major electrophysiological or anatomical risk flags identified.")
 
     factors_html = """
-    <div class="glass-card drivers-box">
-        <ul style="margin: 0; padding-left: 18px; color: #e2e8f0; font-size: 13px; line-height: 1.6;">
+    <div class="glass-audit-card">
+        <div class="audit-badge">PHYSIOLOGICAL FACTOR ATTRIBUTION</div>
+        <ul class="factors-list">
     """
     for f in factors:
-        factors_html += f"<li style='margin-bottom: 6px;'>{f}</li>"
+        factors_html += f"<li>{f}</li>"
     factors_html += "</ul></div>"
 
     return triage_html, comparison_html, factors_html, round(risk_pct, 1)
 
 
+# Preset Clinical Profiles
+PRESETS = {
+    "case_1": [65, "Male", "Asymptomatic / Silent Ischemia (4)", 150, 280, "No (<=120 mg/dl)", "ST-T Wave Abnormality (1)", 125, "Yes", 2.6, "Flat (2)", "2", "Reversible Defect (7)"],
+    "case_2": [56, "Female", "Atypical Angina (2)", 130, 236, "No (<=120 mg/dl)", "Normal (0)", 155, "No", 1.2, "Flat (2)", "0", "Normal (3)"],
+    "case_3": [42, "Female", "Non-Anginal Chest Pain (3)", 118, 195, "No (<=120 mg/dl)", "Normal (0)", 172, "No", 0.0, "Upsloping (1)", "0", "Normal (3)"]
+}
+
+
 # =============================================================================
-# INTENSE GLASSMORPHISM & MINIMALIST BLACK, WHITE & EMERALD GRADIENT STYLING
+# MONOCHROME BLACK & WHITE GLASSMORPHISM CSS
 # =============================================================================
 custom_css = """
-/* Import sleek sans-serif font */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
 :root {
-    --bg-deep: #050708;
-    --bg-card: rgba(13, 19, 17, 0.72);
-    --border-glass: rgba(255, 255, 255, 0.08);
-    --border-emerald: rgba(16, 185, 129, 0.35);
-    --emerald-primary: #10b981;
-    --emerald-glow: rgba(16, 185, 129, 0.4);
-    --text-pure: #ffffff;
-    --text-muted: #94a3b8;
+    --bg-page: #000000;
+    --card-bg: rgba(255, 255, 255, 0.035);
+    --card-bg-hover: rgba(255, 255, 255, 0.055);
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --border-bright: rgba(255, 255, 255, 0.25);
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
 }
 
 body, gradio-app, .gradio-container {
-    background-color: #040607 !important;
-    background-image: 
-        radial-gradient(circle at 15% 10%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(5, 150, 105, 0.06) 0%, transparent 45%),
-        linear-gradient(180deg, #040607 0%, #080d0b 100%) !important;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    color: #ffffff !important;
+    background-color: var(--bg-page) !important;
+    background-image: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    color: var(--text-primary) !important;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Strip any purple/blue default theme backgrounds from headers and labels */
+/* Master Header */
+.app-header {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 14px !important;
+    padding: 24px 30px !important;
+    margin-bottom: 16px !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.brand-title {
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.6px !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    line-height: 1.2;
+}
+
+.brand-subtitle {
+    font-size: 13.5px !important;
+    color: var(--text-secondary) !important;
+    margin: 4px 0 0 0 !important;
+    font-weight: 400 !important;
+}
+
+.tag-badge {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.6px !important;
+    padding: 5px 12px !important;
+    border-radius: 20px !important;
+    text-transform: uppercase;
+}
+
+/* Regulatory Notice */
+.regulatory-bar {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
+    margin-bottom: 20px !important;
+    font-size: 12px !important;
+    color: var(--text-secondary) !important;
+    letter-spacing: 0.2px;
+}
+
+/* Preset Navigation Bar */
+.presets-container {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 14px !important;
+    padding: 14px 18px !important;
+    margin-bottom: 22px !important;
+}
+
+.preset-header-text {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase;
+    color: var(--text-secondary) !important;
+    margin-bottom: 10px !important;
+}
+
+/* Glassmorphism Sections & Cards */
+.glass-section-card {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 14px !important;
+    padding: 18px 20px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+.section-label {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase;
+    color: #ffffff !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Results Display Styling */
+.glass-result-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border-radius: 14px !important;
+    padding: 22px !important;
+    margin-bottom: 16px !important;
+}
+
+.urgent-border {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+.routine-border {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.status-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.urgent-pill {
+    background: #ffffff;
+    color: #000000;
+}
+
+.routine-pill {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.4px;
+}
+
+.risk-gauge-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    min-width: 95px;
+}
+
+.risk-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.risk-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.protocol-box {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.protocol-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.protocol-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #ffffff;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+.protocol-list li {
+    margin-bottom: 8px;
+}
+
+/* Audit & Explanation Cards */
+.glass-audit-card {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 12px !important;
+    padding: 16px 18px !important;
+    margin-bottom: 14px !important;
+}
+
+.highlight-border {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.audit-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.audit-heading {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.audit-body {
+    font-size: 13px;
+    color: #d4d4d8;
+    line-height: 1.55;
+}
+
+.factors-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #e4e4e7;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.factors-list li {
+    margin-bottom: 6px;
+}
+
+/* Form Controls & Inputs */
+div.block, div.box, .gradio-block {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 12px !important;
+}
+
+/* Clear Badges & Set Clean Monochrome Typography */
 label span, span[data-testid="block-info"], .label-text {
     background: transparent !important;
     background-color: transparent !important;
-    color: #e2e8f0 !important;
+    color: #e4e4e7 !important;
     font-weight: 600 !important;
-    font-size: 13.5px !important;
-    letter-spacing: -0.2px !important;
+    font-size: 13px !important;
+    letter-spacing: -0.1px !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
 
-/* Glassmorphism Card Primitives */
-.glass-card {
-    backdrop-filter: blur(24px) saturate(190%);
-    -webkit-backdrop-filter: blur(24px) saturate(190%);
-    border-radius: 16px;
-    padding: 20px 24px;
-    transition: all 0.25s ease-in-out;
-}
-
-.triage-routine {
-    background: rgba(6, 78, 59, 0.22) !important;
-    border: 1px solid rgba(16, 185, 129, 0.5) !important;
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-}
-
-.triage-urgent {
-    background: rgba(127, 29, 29, 0.24) !important;
-    border: 1px solid rgba(239, 68, 68, 0.55) !important;
-    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-}
-
-.rescue-banner {
-    background: rgba(120, 53, 15, 0.28) !important;
-    border: 1px solid rgba(245, 158, 11, 0.5) !important;
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.18) !important;
-    margin-bottom: 14px;
-}
-
-.consensus-banner {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    margin-bottom: 14px;
-}
-
-.drivers-box {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-.badge-routine-pill {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: #ffffff !important;
-    padding: 6px 16px !important;
-    border-radius: 30px !important;
-    font-weight: 700 !important;
-    font-size: 13.5px !important;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
-}
-
-.badge-urgent-pill {
-    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
-    color: #ffffff !important;
-    padding: 6px 16px !important;
-    border-radius: 30px !important;
-    font-weight: 700 !important;
-    font-size: 13.5px !important;
-    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45) !important;
-}
-
-/* Header Glassmorphism Container */
-.premium-header {
-    background: rgba(13, 20, 17, 0.78) !important;
-    backdrop-filter: blur(28px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-bottom: 2px solid rgba(16, 185, 129, 0.45) !important;
-    border-radius: 20px !important;
-    padding: 26px 32px !important;
-    margin-bottom: 18px !important;
-    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.65) !important;
-    text-align: center;
-}
-
-.badge-header-glow {
-    display: inline-block;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    color: #34d399;
-    padding: 5px 16px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    margin-bottom: 12px;
-    box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
-}
-
-/* Disclaimer Glass Pill */
-.premium-disclaimer {
-    background: rgba(245, 158, 11, 0.08) !important;
-    backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(245, 158, 11, 0.3) !important;
-    border-left: 4px solid #f59e0b !important;
-    border-radius: 12px !important;
-    padding: 12px 18px !important;
-    margin-bottom: 22px !important;
-    font-size: 13px !important;
-    color: #fef3c7 !important;
-}
-
-/* Input Blocks & Form Controls Glassmorphism */
-div.block, div.box, .gradio-block, .form {
-    background: rgba(14, 20, 18, 0.65) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35) !important;
-}
-
-/* Form Titles & Section Headers */
-h3, .gr-markdown h3 {
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    margin-top: 14px !important;
-    margin-bottom: 12px !important;
-    letter-spacing: -0.3px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding-bottom: 6px;
-}
-
-/* Inputs, Number inputs, Textboxes */
-input[type="text"], input[type="number"], textarea, select {
+input[type="text"], input[type="number"], select, .gr-dropdown {
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     color: #ffffff !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
+    font-size: 13.5px !important;
 }
 
 input[type="text"]:focus, input[type="number"]:focus, select:focus {
-    border-color: #10b981 !important;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 1px #ffffff !important;
 }
 
-/* Emerald Accent Sliders */
+/* Sliders */
 input[type="range"] {
-    accent-color: #10b981 !important;
+    accent-color: #ffffff !important;
 }
 
-/* Radio buttons & Checkboxes */
-input[type="radio"]:checked, input[type="checkbox"]:checked {
-    background-color: #10b981 !important;
-    border-color: #10b981 !important;
+/* Radio buttons */
+input[type="radio"]:checked {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
 }
 
-/* Ultra-Premium Button: Glowing Emerald Gradient */
-button.primary, .gr-button-primary, button[variant="primary"] {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 14px !important;
-    padding: 16px 28px !important;
-    font-size: 16px !important;
+/* Clean Monochrome Buttons */
+.calculate-btn {
+    background: #ffffff !important;
+    color: #000000 !important;
     font-weight: 700 !important;
-    letter-spacing: -0.3px !important;
-    box-shadow: 0 6px 28px rgba(16, 185, 129, 0.45) !important;
+    font-size: 15px !important;
+    letter-spacing: -0.2px !important;
+    border: 1px solid #ffffff !important;
+    border-radius: 10px !important;
+    padding: 14px 20px !important;
     cursor: pointer !important;
-    transition: all 0.25s ease-in-out !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    margin-top: 10px !important;
 }
 
-button.primary:hover, .gr-button-primary:hover, button[variant="primary"]:hover {
-    background: linear-gradient(135deg, #34d399 0%, #059669 100%) !important;
-    box-shadow: 0 8px 36px rgba(16, 185, 129, 0.7) !important;
-    transform: translateY(-2px) !important;
+.calculate-btn:hover {
+    background: #e4e4e7 !important;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px) !important;
 }
 
-/* Tabs Styling */
-button[role="tab"] {
-    color: #94a3b8 !important;
+.preset-btn {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
-    font-size: 14.5px !important;
+    padding: 8px 14px !important;
+    transition: all 0.2s ease !important;
+}
+
+.preset-btn:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Tabs */
+button[role="tab"] {
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
     border-bottom: 2px solid transparent !important;
     transition: all 0.2s ease !important;
 }
 
 button[role="tab"][aria-selected="true"] {
-    color: #34d399 !important;
-    border-bottom: 2px solid #10b981 !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
 }
 
-/* Presets Table Styling */
-table {
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    border-radius: 12px !important;
-    overflow: hidden !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-th {
-    background: rgba(16, 185, 129, 0.12) !important;
-    color: #34d399 !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-    padding: 10px 14px !important;
-}
-
-td {
-    background: rgba(255, 255, 255, 0.02) !important;
-    color: #e2e8f0 !important;
-    font-size: 13px !important;
-    padding: 9px 14px !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Number display box */
-input[type="number"], .gr-number input {
-    color: #34d399 !important;
-    font-weight: 800 !important;
-    font-size: 24px !important;
-    text-align: center !important;
-}
-
-/* Footer Styling */
-.footer-text {
+.footer-bar {
     text-align: center;
-    font-size: 12.5px;
-    color: #64748b;
-    margin-top: 36px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 40px;
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 """
 
-# Custom Emerald & Zinc Glass Theme
-glass_theme = gr.themes.Base(
-    primary_hue=gr.themes.colors.emerald,
-    secondary_hue=gr.themes.colors.emerald,
+# Base Theme strictly Black & White
+monochrome_theme = gr.themes.Base(
+    primary_hue=gr.themes.colors.zinc,
+    secondary_hue=gr.themes.colors.zinc,
     neutral_hue=gr.themes.colors.zinc,
-    font=[gr.themes.GoogleFont("Plus Jakarta Sans"), "system-ui", "sans-serif"],
+    font=["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
 ).set(
-    body_background_fill="#040607",
-    body_background_fill_dark="#040607",
+    body_background_fill="#000000",
+    body_background_fill_dark="#000000",
     body_text_color="#ffffff",
     body_text_color_dark="#ffffff",
-    block_background_fill="rgba(14, 20, 18, 0.65)",
-    block_background_fill_dark="rgba(14, 20, 18, 0.65)",
+    block_background_fill="rgba(255, 255, 255, 0.03)",
+    block_background_fill_dark="rgba(255, 255, 255, 0.03)",
     block_border_width="1px",
-    block_border_color="rgba(255, 255, 255, 0.08)",
-    block_border_color_dark="rgba(255, 255, 255, 0.08)",
-    button_primary_background_fill="linear-gradient(135deg, #10b981 0%, #059669 100%)",
-    button_primary_background_fill_dark="linear-gradient(135deg, #10b981 0%, #059669 100%)",
-    button_primary_text_color="#ffffff",
-    button_primary_text_color_dark="#ffffff",
-    slider_color="#10b981",
-    slider_color_dark="#10b981",
+    block_border_color="rgba(255, 255, 255, 0.12)",
+    block_border_color_dark="rgba(255, 255, 255, 0.12)",
+    button_primary_background_fill="#ffffff",
+    button_primary_background_fill_dark="#ffffff",
+    button_primary_text_color="#000000",
+    button_primary_text_color_dark="#000000",
+    slider_color="#ffffff",
+    slider_color_dark="#ffffff",
     input_background_fill="rgba(255, 255, 255, 0.04)",
     input_background_fill_dark="rgba(255, 255, 255, 0.04)",
-    input_border_color="rgba(255, 255, 255, 0.1)",
-    input_border_color_dark="rgba(255, 255, 255, 0.1)",
+    input_border_color="rgba(255, 255, 255, 0.12)",
+    input_border_color_dark="rgba(255, 255, 255, 0.12)",
 )
+
+# Compute Initial State so the interface opens fully populated (NO BLANK BOXES)
+INIT_VALS = PRESETS["case_2"]  # Default to Case 2: Borderline Rescue to demonstrate innovation immediately
+init_triage_html, init_comp_html, init_factors_html, init_risk = predict_cardiac_triage(*INIT_VALS)
+
 
 # =============================================================================
 # GRADIO APPLICATION LAYOUT
 # =============================================================================
 with gr.Blocks(title="CardioTriage: Clinical Triage DSS") as demo:
-    
-    # Direct Style Injection for guaranteed CSS rendering across all Gradio versions
+
+    # Direct Style Injection
     gr.HTML(f"<style>{custom_css}</style>")
 
+    # Master Header
     gr.HTML("""
-    <div class="premium-header">
-        <div class="badge-header-glow">AI + HEALTH TRACK | VERITAS AI HACKATHON 2026</div>
-        <h1 style="margin: 4px 0 8px 0; font-size: 32px; font-weight: 800; letter-spacing: -0.8px; color: #ffffff;">
-            🫀 CardioTriage
-        </h1>
-        <p style="margin: 0 auto; max-width: 680px; font-size: 14.5px; color: #cbd5e1; line-height: 1.5;">
-            Cost-Sensitive Cardiac Triage & Multi-Hospital Generalization System for Rural Frontline Providers
-        </p>
-        <p style="margin: 6px 0 0 0; font-size: 12.5px; color: #94a3b8;">
-            Developed by <strong>Krishna Sunil Wararkar</strong> (ST. Paul High School)
-        </p>
+    <div class="app-header">
+        <div>
+            <h1 class="brand-title">CardioTriage</h1>
+            <p class="brand-subtitle">
+                Cost-Sensitive Cardiac Triage & Cross-Hospital Generalization System for Frontline Rural Healthcare
+            </p>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="tag-badge">AI + Health Track</span>
+            <span class="tag-badge">Veritas AI 2026</span>
+        </div>
     </div>
-    <div class="premium-disclaimer">
-        <strong>⚠️ REGULATORY DISCLAIMER:</strong> This project is a prototype and is not medical advice. 
-        It is an academic decision-support proof-of-concept exploring asymmetric loss calibration and domain-shift mitigation for frontline rural triage.
+    <div class="regulatory-bar">
+        <strong>REGULATORY PROTOTYPE NOTICE:</strong> Academic decision-support proof-of-concept exploring asymmetric loss calibration (&tau;* = 0.31) and domain-shift mitigation. Not direct medical advice.
     </div>
     """)
 
     with gr.Tabs():
-        # TAB 1: LIVE CLINICAL TRIAGE TOOL
-        with gr.Tab("🩺 Frontline Patient Triage DSS"):
+        # TAB 1: CLINICAL TRIAGE TOOL
+        with gr.Tab("Frontline Clinical Triage"):
+            
+            # Interactive Quick-Load Presets Bar
             with gr.Row():
-                # LEFT COLUMN: PATIENT CLINICAL MEASUREMENTS (Input Form)
-                with gr.Column(scale=5):
-                    gr.Markdown("### 📋 1. Patient Demographics & Baseline Vitals")
+                with gr.Column(scale=12):
+                    gr.HTML("<div class='preset-header-text'>Quick-Load Representative Patient Scenarios:</div>")
                     with gr.Row():
-                        age_input = gr.Slider(minimum=25, maximum=85, value=58, step=1, label="Patient Age (years)")
-                        sex_input = gr.Radio(choices=["Male", "Female"], value="Male", label="Biological Sex")
-                    
-                    with gr.Row():
-                        trestbps_input = gr.Slider(minimum=80, maximum=210, value=135, step=1, label="Resting Blood Pressure (mm Hg)")
-                        chol_input = gr.Slider(minimum=100, maximum=550, value=250, step=5, label="Serum Cholesterol (mg/dl)")
+                        btn_case1 = gr.Button("Case 1: Confirmed Acute (65M)", elem_classes="preset-btn")
+                        btn_case2 = gr.Button("Case 2: Borderline Rescue (56F)", elem_classes="preset-btn")
+                        btn_case3 = gr.Button("Case 3: Ambulatory Routine (42F)", elem_classes="preset-btn")
 
-                    gr.Markdown("### 🫀 2. Symptom Presentation & Stress Test")
-                    cp_input = gr.Dropdown(
-                        choices=[
-                            "Typical Angina (1)",
-                            "Atypical Angina (2)",
-                            "Non-Anginal Chest Pain (3)",
-                            "Asymptomatic / Silent Ischemia (4)"
-                        ],
-                        value="Asymptomatic / Silent Ischemia (4)",
-                        label="Chest Pain Type (Angina Presentation)"
-                    )
+            with gr.Row():
+                # LEFT COLUMN: INTAKE PARAMETERS
+                with gr.Column(scale=6):
                     
-                    with gr.Row():
-                        thalach_input = gr.Slider(minimum=60, maximum=210, value=140, step=1, label="Max Heart Rate Achieved (bpm)")
-                        oldpeak_input = gr.Slider(minimum=0.0, maximum=6.2, value=1.6, step=0.1, label="ST Depression Induced by Exercise (mm)")
-                    
-                    with gr.Row():
-                        exang_input = gr.Radio(choices=["Yes", "No"], value="Yes", label="Exercise-Induced Angina")
-                        fbs_input = gr.Radio(choices=["No (<=120 mg/dl)", "Yes (>120 mg/dl)"], value="No (<=120 mg/dl)", label="Fasting Blood Sugar > 120 mg/dl")
+                    with gr.Group():
+                        gr.HTML("<div class='section-label'>1. Demographics & Baseline Vitals</div>")
+                        with gr.Row():
+                            age_input = gr.Slider(minimum=25, maximum=85, value=INIT_VALS[0], step=1, label="Patient Age (years)")
+                            sex_input = gr.Radio(choices=["Male", "Female"], value=INIT_VALS[1], label="Biological Sex")
+                        with gr.Row():
+                            trestbps_input = gr.Slider(minimum=80, maximum=210, value=INIT_VALS[3], step=1, label="Resting Blood Pressure (mm Hg)")
+                            chol_input = gr.Slider(minimum=100, maximum=550, value=INIT_VALS[4], step=5, label="Serum Cholesterol (mg/dl)")
 
-                    gr.Markdown("### 🔬 3. Electrocardiography & Specialist Diagnostics")
-                    with gr.Row():
-                        restecg_input = gr.Dropdown(
-                            choices=["Normal (0)", "ST-T Wave Abnormality (1)", "Left Ventricular Hypertrophy (2)"],
-                            value="Normal (0)",
-                            label="Resting Electrocardiogram (ECG)"
+                    with gr.Group():
+                        gr.HTML("<div class='section-label'>2. Symptoms & Exercise Stress Response</div>")
+                        cp_input = gr.Dropdown(
+                            choices=[
+                                "Typical Angina (1)",
+                                "Atypical Angina (2)",
+                                "Non-Anginal Chest Pain (3)",
+                                "Asymptomatic / Silent Ischemia (4)"
+                            ],
+                            value=INIT_VALS[2],
+                            label="Chest Pain Presentation (Angina Type)"
                         )
-                        slope_input = gr.Dropdown(
-                            choices=["Upsloping (1)", "Flat (2)", "Downsloping (3)"],
-                            value="Flat (2)",
-                            label="Peak Exercise ST Segment Slope"
-                        )
+                        with gr.Row():
+                            thalach_input = gr.Slider(minimum=60, maximum=210, value=INIT_VALS[7], step=1, label="Max Heart Rate Achieved (bpm)")
+                            oldpeak_input = gr.Slider(minimum=0.0, maximum=6.2, value=INIT_VALS[9], step=0.1, label="ST Depression Induced by Exercise (mm)")
+                        with gr.Row():
+                            exang_input = gr.Radio(choices=["Yes", "No"], value=INIT_VALS[8], label="Exercise-Induced Angina")
+                            fbs_input = gr.Radio(choices=["No (<=120 mg/dl)", "Yes (>120 mg/dl)"], value=INIT_VALS[5], label="Fasting Blood Sugar > 120 mg/dl")
 
-                    with gr.Row():
-                        ca_input = gr.Dropdown(
-                            choices=["0", "1", "2", "3"],
-                            value="1",
-                            label="Major Vessels via Fluoroscopy (ca) [0 if unavailable]"
-                        )
-                        thal_input = gr.Dropdown(
-                            choices=["Normal (3)", "Fixed Defect (6)", "Reversible Defect (7)"],
-                            value="Reversible Defect (7)",
-                            label="Thallium Nuclear Scan [Normal if unavailable]"
-                        )
+                    with gr.Group():
+                        gr.HTML("<div class='section-label'>3. Secondary Clinical Diagnostics (Optional)</div>")
+                        with gr.Row():
+                            restecg_input = gr.Dropdown(
+                                choices=["Normal (0)", "ST-T Wave Abnormality (1)", "Left Ventricular Hypertrophy (2)"],
+                                value=INIT_VALS[6],
+                                label="Resting Electrocardiogram (ECG)"
+                            )
+                            slope_input = gr.Dropdown(
+                                choices=["Upsloping (1)", "Flat (2)", "Downsloping (3)"],
+                                value=INIT_VALS[10],
+                                label="Peak Exercise ST Slope"
+                            )
+                        with gr.Row():
+                            ca_input = gr.Dropdown(
+                                choices=["0", "1", "2", "3"],
+                                value=INIT_VALS[11],
+                                label="Major Vessels via Fluoroscopy (ca) [0 if unavailable]"
+                            )
+                            thal_input = gr.Dropdown(
+                                choices=["Normal (3)", "Fixed Defect (6)", "Reversible Defect (7)"],
+                                value=INIT_VALS[12],
+                                label="Thallium Nuclear Scan [Normal if unavailable]"
+                            )
 
-                    triage_btn = gr.Button("⚡ Generate Clinical Triage Decision", variant="primary", size="lg")
+                    triage_btn = gr.Button("Calculate Clinical Triage Decision", elem_classes="calculate-btn")
 
-                # RIGHT COLUMN: TRIAGE RESULTS & DECISION SUPPORT
-                with gr.Column(scale=5):
-                    gr.Markdown("### 🚨 Triage Decision & Action Protocol")
-                    triage_badge_output = gr.HTML(label="Triage Status")
-                    risk_score_output = gr.Number(label="Assessed Cardiac Risk Probability (%)")
-                    
-                    gr.Markdown("### ⚖️ Clinical Safety & Model Consensus")
-                    comparison_output = gr.HTML(label="Threshold Safety Audit")
-                    
-                    gr.Markdown("### 🔍 Top Diagnostic Risk Drivers")
-                    factors_output = gr.HTML(label="Clinical Drivers")
+                # RIGHT COLUMN: TRIAGE RESULTS & DECISION SUPPORT (Pre-populated on load)
+                with gr.Column(scale=6):
+                    triage_badge_output = gr.HTML(value=init_triage_html)
+                    comparison_output = gr.HTML(value=init_comp_html)
+                    factors_output = gr.HTML(value=init_factors_html)
 
-            # PRESET CLINICAL SCENARIOS FOR INSTANT TESTING
-            gr.Markdown("---")
-            gr.Markdown("### 💡 Representative Clinical Scenarios (Click to Load)")
-            gr.Examples(
-                examples=[
-                    # Case 1: High Risk Confirmed (Acute Ischemia)
-                    [65, "Male", "Asymptomatic / Silent Ischemia (4)", 150, 280, "No (<=120 mg/dl)", "ST-T Wave Abnormality (1)", 125, "Yes", 2.6, "Flat (2)", "2", "Reversible Defect (7)"],
-                    # Case 2: Borderline Rescued Patient (Standard AI misses this!)
-                    [56, "Female", "Atypical Angina (2)", 130, 236, "No (<=120 mg/dl)", "Normal (0)", 155, "No", 1.2, "Flat (2)", "0", "Normal (3)"],
-                    # Case 3: Routine Ambulatory Patient
-                    [42, "Female", "Non-Anginal Chest Pain (3)", 118, 195, "No (<=120 mg/dl)", "Normal (0)", 172, "No", 0.0, "Upsloping (1)", "0", "Normal (3)"]
-                ],
-                inputs=[
-                    age_input, sex_input, cp_input, trestbps_input, chol_input, fbs_input,
-                    restecg_input, thalach_input, exang_input, oldpeak_input, slope_input, ca_input, thal_input
-                ],
-                label="Quick-Load Clinical Presets"
-            )
+            # Input List for linking
+            all_inputs = [
+                age_input, sex_input, cp_input, trestbps_input, chol_input, fbs_input,
+                restecg_input, thalach_input, exang_input, oldpeak_input, slope_input, ca_input, thal_input
+            ]
+            all_outputs = [triage_badge_output, comparison_output, factors_output]
 
-            # Link Button Callback
+            # Main Calculate Button Action
+            def run_triage_and_format(*args):
+                t_html, c_html, f_html, _ = predict_cardiac_triage(*args)
+                return t_html, c_html, f_html
+
             triage_btn.click(
-                fn=predict_cardiac_triage,
-                inputs=[
-                    age_input, sex_input, cp_input, trestbps_input, chol_input, fbs_input,
-                    restecg_input, thalach_input, exang_input, oldpeak_input, slope_input, ca_input, thal_input
-                ],
-                outputs=[triage_badge_output, comparison_output, factors_output, risk_score_output]
+                fn=run_triage_and_format,
+                inputs=all_inputs,
+                outputs=all_outputs
             )
 
-        # TAB 2: RESEARCH AUDIT & OOD SCIENTIFIC BENCHMARK
-        with gr.Tab("📊 Multi-Hospital OOD & Explainability Audit"):
-            gr.Markdown("""
-            ### 🔬 Scientific Validation & Cross-Hospital Stress Testing
-            Conventional medical AI often experiences catastrophic domain shift when deployed in new clinical settings.
-            Below is the empirical evidence generated by our multi-cohort audit across **Cleveland Clinic**, **Hungarian Institute of Cardiology**, 
-            **Zurich University Hospital**, and the **VA Long Beach Medical Center**.
+            # Preset 1 Click Handler (High Risk)
+            def load_preset_1():
+                v = PRESETS["case_1"]
+                t_html, c_html, f_html, _ = predict_cardiac_triage(*v)
+                return (*v, t_html, c_html, f_html)
+
+            btn_case1.click(
+                fn=load_preset_1,
+                inputs=[],
+                outputs=all_inputs + all_outputs
+            )
+
+            # Preset 2 Click Handler (Rescue Case)
+            def load_preset_2():
+                v = PRESETS["case_2"]
+                t_html, c_html, f_html, _ = predict_cardiac_triage(*v)
+                return (*v, t_html, c_html, f_html)
+
+            btn_case2.click(
+                fn=load_preset_2,
+                inputs=[],
+                outputs=all_inputs + all_outputs
+            )
+
+            # Preset 3 Click Handler (Ambulatory)
+            def load_preset_3():
+                v = PRESETS["case_3"]
+                t_html, c_html, f_html, _ = predict_cardiac_triage(*v)
+                return (*v, t_html, c_html, f_html)
+
+            btn_case3.click(
+                fn=load_preset_3,
+                inputs=[],
+                outputs=all_inputs + all_outputs
+            )
+
+        # TAB 2: AUDIT & EXPLAINABILITY
+        with gr.Tab("Multi-Hospital OOD & Explainability Audit"):
+            gr.HTML("""
+            <div style="padding: 10px 0 20px 0;">
+                <h3 style="color: #ffffff; font-size: 18px; font-weight: 700; margin: 0 0 6px 0;">
+                    Scientific Validation & Cross-Hospital Stress Testing
+                </h3>
+                <p style="color: #a1a1aa; font-size: 13.5px; margin: 0; line-height: 1.5;">
+                    Empirical validation of model generalizability across 920 patients from Cleveland Clinic, 
+                    Hungarian Institute of Cardiology, Zurich University Hospital, and VA Medical Center Long Beach.
+                </p>
+            </div>
             """)
             
             with gr.Row():
                 with gr.Column():
-                    gr.Markdown("#### 1. Multi-Hospital Out-of-Distribution Generalization")
+                    gr.HTML("<div class='section-label'>1. Cross-Hospital Out-of-Distribution Generalization</div>")
                     gr.Image(value=os.path.join(OUTPUTS_DIR, "ood_generalization_audit.png"), label="OOD Generalization (4 Cohorts, N=920)")
                 with gr.Column():
-                    gr.Markdown("#### 2. Subgroup Demographic Fairness Audit")
+                    gr.HTML("<div class='section-label'>2. Subgroup Demographic Fairness Audit</div>")
                     gr.Image(value=os.path.join(OUTPUTS_DIR, "subgroup_fairness_audit.png"), label="Subgroup Parity: Sex & Age")
 
             with gr.Row():
                 with gr.Column():
-                    gr.Markdown("#### 3. Asymmetric Clinical Cost Optimization Curve")
-                    gr.Image(value=os.path.join(OUTPUTS_DIR, "cost_threshold_optimization_curve.png"), label="Cost vs Threshold Curve")
+                    gr.HTML("<div class='section-label'>3. Asymmetric Cost-Sensitive Threshold Curve</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "cost_threshold_optimization_curve.png"), label="Loss Surface & Threshold Optimization")
                 with gr.Column():
-                    gr.Markdown("#### 4. Global SHAP Clinical Feature Attribution")
+                    gr.HTML("<div class='section-label'>4. Global Feature Attribution (TreeSHAP)</div>")
                     gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_global_summary.png"), label="Global SHAP Summary")
 
-            gr.Markdown("#### 5. Local Clinical Case Forensics (SHAP Waterfall Attributions)")
+            gr.HTML("<div class='section-label' style='margin-top: 20px;'>5. Local Clinical Case Forensics (SHAP Waterfall Plots)</div>")
             with gr.Row():
                 gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_true_positive.png"), label="True Positive: Acute Ischemia")
                 gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_triage_rescue.png"), label="Triage Rescue: Rescued False Negative")
-                gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_false_alarm.png"), label="False Alarm: Atypical Case")
+                gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_false_alarm.png"), label="False Alarm: Atypical Presentation")
 
     gr.HTML("""
-    <div class="footer-text">
-        <strong style="color: #e2e8f0;">CardioTriage Clinical Decision Support System</strong> | Veritas AI International High School Hackathon 2026<br>
-        Developed by Krishna Sunil Wararkar (ST. Paul High School) | Track: Health
+    <div class="footer-bar">
+        CardioTriage System • Veritas AI International High School Hackathon 2026 • AI + Health Track<br>
+        Developed by Krishna Sunil Wararkar (ST. Paul High School)
     </div>
     """)
 
 
 if __name__ == "__main__":
     print("[*] Launching CardioTriage Clinical Decision Support System...")
-    demo.launch(server_name="127.0.0.1", server_port=7860, theme=glass_theme, css=custom_css)
+    demo.launch(server_name="127.0.0.1", server_port=7860, theme=monochrome_theme)
