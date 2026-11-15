@@ -7,6 +7,7 @@ at understaffed rural health centers lacking immediate on-site cardiologists.
 Implements asymmetric cost-sensitive triage (tau* = 0.31) to eliminate false negatives.
 
 Design System: Minimalist Pure Black & Crisp White Monochrome with Intense Glassmorphism.
+All cards feature generous rounded corners, flawless text enclosure, and structured hierarchy.
 """
 
 import os
@@ -104,54 +105,74 @@ def predict_cardiac_triage(
     is_urgent_cardiotriage = (risk_prob >= TAU_OPT)
     is_urgent_standard = (risk_prob >= TAU_STD)
 
-    # 1. Clean Monochrome Glassmorphism Triage Card
+    # 1. Clean Monochrome Glassmorphism Triage Card with Proper Text Wrapping & Rounded Corners
     if is_urgent_cardiotriage:
         triage_html = f"""
-        <div class="glass-result-card urgent-border">
-            <div class="result-header">
-                <div>
-                    <span class="status-pill urgent-pill">URGENT ESCALATION REQUIRED</span>
-                    <h2 class="result-title">Immediate Secondary Cardiology Transfer</h2>
-                </div>
-                <div class="risk-gauge-box">
-                    <span class="risk-number">{risk_pct:.1f}%</span>
-                    <span class="risk-label">CARDIAC RISK</span>
+        <div class="result-card urgent-glass">
+            <div class="card-top-bar">
+                <span class="status-badge urgent-badge">URGENT ESCALATION REQUIRED</span>
+                <div class="gauge-pill">
+                    <span class="gauge-num">{risk_pct:.1f}%</span>
+                    <span class="gauge-sub">RISK</span>
                 </div>
             </div>
             
-            <div class="protocol-box">
-                <div class="protocol-title">MANDATORY EMERGENCY NURSE PROTOCOL</div>
-                <ol class="protocol-list">
-                    <li><strong>Continuous Telemetry:</strong> Immediately initiate 12-lead continuous ECG telemetry and pulse oximetry.</li>
-                    <li><strong>Vascular Access & Labs:</strong> Establish two 18-gauge peripheral IV access lines; draw STAT troponin biomarkers.</li>
-                    <li><strong>Antiplatelet Administration:</strong> Administer 325 mg chewable aspirin if no active bleeding or severe allergy.</li>
-                    <li><strong>Transfer Dispatch:</strong> Alert regional paramedic dispatch for emergent transfer to cath-capable tertiary center.</li>
-                </ol>
+            <h2 class="card-main-title">Emergent Secondary Cardiology Transfer</h2>
+            <div class="card-subtitle">Clinical Priority: Acute Ischemia / High Cardiac Risk</div>
+            
+            <div class="inner-protocol-box">
+                <div class="protocol-header">MANDATORY FRONTLINE NURSING PROTOCOL</div>
+                <div class="protocol-item">
+                    <span class="step-num">1</span>
+                    <div class="step-desc"><strong>ECG & Telemetry:</strong> Immediately initiate 12-lead continuous ECG monitoring and pulse oximetry.</div>
+                </div>
+                <div class="protocol-item">
+                    <span class="step-num">2</span>
+                    <div class="step-desc"><strong>Vascular Access & Labs:</strong> Place two 18-gauge peripheral IV lines; draw STAT troponin biomarkers.</div>
+                </div>
+                <div class="protocol-item">
+                    <span class="step-num">3</span>
+                    <div class="step-desc"><strong>Antiplatelet Loading:</strong> Administer 325 mg chewable aspirin if not contraindicated.</div>
+                </div>
+                <div class="protocol-item">
+                    <span class="step-num">4</span>
+                    <div class="step-desc"><strong>Transfer Dispatch:</strong> Alert regional paramedic transport for emergent catheterization transfer.</div>
+                </div>
             </div>
         </div>
         """
     else:
         triage_html = f"""
-        <div class="glass-result-card routine-border">
-            <div class="result-header">
-                <div>
-                    <span class="status-pill routine-pill">ROUTINE AMBULATORY STATUS</span>
-                    <h2 class="result-title">Non-Emergent Outpatient Management</h2>
-                </div>
-                <div class="risk-gauge-box">
-                    <span class="risk-number">{risk_pct:.1f}%</span>
-                    <span class="risk-label">CARDIAC RISK</span>
+        <div class="result-card routine-glass">
+            <div class="card-top-bar">
+                <span class="status-badge routine-badge">ROUTINE AMBULATORY STATUS</span>
+                <div class="gauge-pill">
+                    <span class="gauge-num">{risk_pct:.1f}%</span>
+                    <span class="gauge-sub">RISK</span>
                 </div>
             </div>
             
-            <div class="protocol-box">
-                <div class="protocol-title">STANDARD AMBULATORY CLINICAL PROTOCOL</div>
-                <ol class="protocol-list">
-                    <li><strong>Stable Hemodynamics:</strong> Patient vitals remain within safe non-emergent ambulatory limits.</li>
-                    <li><strong>Outpatient Diagnostic Referral:</strong> Schedule elective echocardiogram or exercise treadmill evaluation within 14–30 days.</li>
-                    <li><strong>Preventive Counseling:</strong> Review dietary lipid management, smoking cessation, and home blood pressure logging.</li>
-                    <li><strong>Discharge Red Flags:</strong> Provide written discharge instructions on emergency red flags (radiating crushing chest pressure).</li>
-                </ol>
+            <h2 class="card-main-title">Non-Emergent Outpatient Management</h2>
+            <div class="card-subtitle">Clinical Priority: Low / Moderate Baseline Risk</div>
+            
+            <div class="inner-protocol-box">
+                <div class="protocol-header">STANDARD CLINICAL CARE PROTOCOL</div>
+                <div class="protocol-item">
+                    <span class="step-num">1</span>
+                    <div class="step-desc"><strong>Hemodynamic Stability:</strong> Patient intake vitals remain within safe ambulatory limits.</div>
+                </div>
+                <div class="protocol-item">
+                    <span class="step-num">2</span>
+                    <div class="step-desc"><strong>Outpatient Referral:</strong> Coordinate elective echocardiogram or treadmill stress test within 14–30 days.</div>
+                </div>
+                <div class="protocol-item">
+                    <span class="step-num">3</span>
+                    <div class="step-desc"><strong>Preventive Management:</strong> Counsel on dietary lipid control, smoking cessation, and BP logging.</div>
+                </div>
+                <div class="protocol-item">
+                    <span class="step-num">4</span>
+                    <div class="step-desc"><strong>Discharge Education:</strong> Provide warning signs on acute symptoms (retrosternal pressure, diaphoresis).</div>
+                </div>
             </div>
         </div>
         """
@@ -159,35 +180,35 @@ def predict_cardiac_triage(
     # 2. Model Consensus & Safety Audit
     if is_urgent_cardiotriage and not is_urgent_standard:
         comparison_html = f"""
-        <div class="glass-audit-card highlight-border">
-            <div class="audit-badge">SAFETY RESCUE ALERT • 5:1 CLINICAL ASYMMETRY</div>
-            <div class="audit-heading">Standard AI Missed Case Rescued by CardioTriage</div>
-            <div class="audit-body">
-                A conventional machine learning classifier operating at the standard 50% cutoff categorized this patient as 
-                <strong>'HEALTHY' ({risk_pct:.1f}%)</strong> and would have mistakenly discharged them home. 
-                CardioTriage's calibrated safety threshold (<strong>&tau;* = {TAU_OPT:.2f}</strong>) successfully caught this borderline ischemia, 
-                eliminating a fatal diagnostic delay.
-            </div>
+        <div class="audit-card highlight-audit">
+            <div class="audit-tag">SAFETY RESCUE ALERT • ASYMMETRIC 5:1 PENALTY</div>
+            <div class="audit-title">Standard AI Missed Case Rescued by CardioTriage</div>
+            <p class="audit-text">
+                A conventional AI model with an uncalibrated 50% cutoff categorized this patient as 
+                <strong>'HEALTHY' ({risk_pct:.1f}%)</strong> and would have mistakenly sent them home. 
+                CardioTriage's safety-calibrated threshold (<strong>&tau;* = {TAU_OPT:.2f}</strong>) 
+                correctly caught this borderline case, eliminating a preventable diagnostic delay.
+            </p>
         </div>
         """
     elif is_urgent_cardiotriage and is_urgent_standard:
         comparison_html = f"""
-        <div class="glass-audit-card">
-            <div class="audit-badge">FULL MODEL CONCURRENCE</div>
-            <div class="audit-heading">Unanimous High Risk Stratification</div>
-            <div class="audit-body">
-                Both standard machine learning (&tau; = 0.50) and CardioTriage (&tau;* = 0.31) concur that this patient's acute ischemic risk ({risk_pct:.1f}%) warrants immediate emergency cardiology escalation.
-            </div>
+        <div class="audit-card">
+            <div class="audit-tag">MODEL CONCURRENCE</div>
+            <div class="audit-title">Unanimous High Risk Stratification</div>
+            <p class="audit-text">
+                Both standard machine learning (&tau; = 0.50) and CardioTriage (&tau;* = 0.31) concur that this patient's assessed ischemic risk ({risk_pct:.1f}%) warrants immediate emergency cardiology escalation.
+            </p>
         </div>
         """
     else:
         comparison_html = f"""
-        <div class="glass-audit-card">
-            <div class="audit-badge">FULL MODEL CONCURRENCE</div>
-            <div class="audit-heading">Unanimous Low Risk Stratification</div>
-            <div class="audit-body">
-                Both models agree that acute ischemic risk ({risk_pct:.1f}%) is low. Routine outpatient care is clinically appropriate.
-            </div>
+        <div class="audit-card">
+            <div class="audit-tag">MODEL CONCURRENCE</div>
+            <div class="audit-title">Unanimous Low Risk Stratification</div>
+            <p class="audit-text">
+                Both standard AI and CardioTriage agree that acute ischemic risk ({risk_pct:.1f}%) is low. Routine outpatient care is clinically appropriate.
+            </p>
         </div>
         """
 
@@ -196,13 +217,13 @@ def predict_cardiac_triage(
     if oldpeak >= 1.5:
         factors.append(f"<strong>ST Depression ({oldpeak:.1f} mm):</strong> Severe exercise-induced subendocardial ischemic response.")
     if cp_val == 4.0:
-        factors.append("<strong>Silent Ischemia / Asymptomatic:</strong> Treacherous presentation strongly associated with multi-vessel CAD.")
+        factors.append("<strong>Silent Ischemia / Asymptomatic:</strong> High correlation with multi-vessel anatomical coronary disease.")
     if ca_val >= 1.0:
         factors.append(f"<strong>Fluoroscopy Stenosis ({int(ca_val)} vessels):</strong> Major anatomical confirmation of coronary arterial obstruction.")
     if thal_val == 7.0:
         factors.append("<strong>Reversible Thallium Defect:</strong> Confirms viable but ischemic myocardium under hemodynamic stress.")
     if exang_val == 1.0:
-        factors.append("<strong>Exercise-Induced Angina:</strong> Diagnostic evidence of myocardial oxygen supply/demand mismatch.")
+        factors.append("<strong>Exercise-Induced Angina:</strong> Clinical marker of myocardial oxygen supply/demand deficit.")
     if thalach < 120.0:
         factors.append(f"<strong>Chronotropic Incompetence ({int(thalach)} bpm):</strong> Inability to reach expected physiologic heart rate.")
     if trestbps >= 140.0:
@@ -214,9 +235,9 @@ def predict_cardiac_triage(
         factors.append("<strong>Normal Baseline Parameters:</strong> No major electrophysiological or anatomical risk flags identified.")
 
     factors_html = """
-    <div class="glass-audit-card">
-        <div class="audit-badge">PHYSIOLOGICAL FACTOR ATTRIBUTION</div>
-        <ul class="factors-list">
+    <div class="audit-card">
+        <div class="audit-tag">PHYSIOLOGICAL RISK ATTRIBUTION</div>
+        <ul class="driver-list">
     """
     for f in factors:
         factors_html += f"<li>{f}</li>"
@@ -235,114 +256,110 @@ PRESETS = {
 
 # =============================================================================
 # MONOCHROME BLACK & WHITE GLASSMORPHISM CSS
+# Engineered for flawless layout wrapping, generous rounded corners & zero overlap
 # =============================================================================
 custom_css = """
-:root {
-    --bg-page: #000000;
-    --card-bg: rgba(255, 255, 255, 0.035);
-    --card-bg-hover: rgba(255, 255, 255, 0.055);
-    --border-subtle: rgba(255, 255, 255, 0.12);
-    --border-bright: rgba(255, 255, 255, 0.25);
-    --text-primary: #ffffff;
-    --text-secondary: #a1a1aa;
-    --text-tertiary: #71717a;
+* {
+    box-sizing: border-box !important;
 }
 
 body, gradio-app, .gradio-container {
-    background-color: var(--bg-page) !important;
+    background-color: #000000 !important;
     background-image: none !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    color: var(--text-primary) !important;
-    -webkit-font-smoothing: antialiased;
+    color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* Master Header */
-.app-header {
-    background: rgba(255, 255, 255, 0.02) !important;
+/* Master Header Container */
+.app-header-box {
+    background: rgba(255, 255, 255, 0.03) !important;
     backdrop-filter: blur(24px) !important;
     -webkit-backdrop-filter: blur(24px) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: 14px !important;
-    padding: 24px 30px !important;
-    margin-bottom: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 18px !important;
+    padding: 22px 28px !important;
+    margin-bottom: 14px !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 14px;
 }
 
-.brand-title {
+.brand-main {
     font-size: 26px !important;
     font-weight: 800 !important;
     letter-spacing: -0.6px !important;
     color: #ffffff !important;
     margin: 0 !important;
-    line-height: 1.2;
 }
 
-.brand-subtitle {
+.brand-desc {
     font-size: 13.5px !important;
-    color: var(--text-secondary) !important;
+    color: #a1a1aa !important;
     margin: 4px 0 0 0 !important;
     font-weight: 400 !important;
 }
 
-.tag-badge {
+.header-meta-pill {
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
     color: #ffffff !important;
     font-size: 11.5px !important;
     font-weight: 600 !important;
-    letter-spacing: 0.6px !important;
-    padding: 5px 12px !important;
-    border-radius: 20px !important;
+    letter-spacing: 0.5px !important;
+    padding: 6px 14px !important;
+    border-radius: 24px !important;
     text-transform: uppercase;
 }
 
 /* Regulatory Notice */
-.regulatory-bar {
+.regulatory-pill {
     background: rgba(255, 255, 255, 0.02) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 10px !important;
-    padding: 10px 16px !important;
-    margin-bottom: 20px !important;
+    border-radius: 12px !important;
+    padding: 10px 18px !important;
+    margin-bottom: 18px !important;
     font-size: 12px !important;
-    color: var(--text-secondary) !important;
-    letter-spacing: 0.2px;
+    color: #a1a1aa !important;
+    line-height: 1.4;
 }
 
 /* Preset Navigation Bar */
-.presets-container {
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: 14px !important;
-    padding: 14px 18px !important;
-    margin-bottom: 22px !important;
+.presets-glass-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 16px !important;
+    padding: 16px 20px !important;
+    margin-bottom: 20px !important;
 }
 
-.preset-header-text {
-    font-size: 12px !important;
+.preset-title-label {
+    font-size: 11.5px !important;
     font-weight: 700 !important;
     letter-spacing: 0.8px !important;
     text-transform: uppercase;
-    color: var(--text-secondary) !important;
+    color: #a1a1aa !important;
     margin-bottom: 10px !important;
 }
 
-/* Glassmorphism Sections & Cards */
-.glass-section-card {
-    background: var(--card-bg) !important;
+/* Left Column Input Cards with Rounded Corners */
+.form-card {
+    background: rgba(255, 255, 255, 0.035) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: 14px !important;
-    padding: 18px 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 18px !important;
+    padding: 20px 22px !important;
     margin-bottom: 16px !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6) !important;
 }
 
-.section-label {
+.card-title-label {
     font-size: 12px !important;
     font-weight: 700 !important;
     letter-spacing: 0.8px !important;
@@ -353,156 +370,189 @@ body, gradio-app, .gradio-container {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Results Display Styling */
-.glass-result-card {
-    background: rgba(255, 255, 255, 0.03) !important;
+/* Results Display Styling - Guaranteed Text Enclosure */
+.result-card {
+    background: rgba(255, 255, 255, 0.04) !important;
     backdrop-filter: blur(28px) !important;
     -webkit-backdrop-filter: blur(28px) !important;
-    border-radius: 14px !important;
-    padding: 22px !important;
+    border-radius: 18px !important;
+    padding: 22px 24px !important;
     margin-bottom: 16px !important;
+    width: 100% !important;
+    overflow: hidden !important;
 }
 
-.urgent-border {
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+.urgent-glass {
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 10px 36px rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
 }
 
-.routine-border {
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+.routine-glass {
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
 }
 
-.result-header {
+.card-top-bar {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
-.status-pill {
-    display: inline-block;
+.status-badge {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    display: inline-block;
 }
 
-.urgent-pill {
+.urgent-badge {
     background: #ffffff;
     color: #000000;
 }
 
-.routine-pill {
+.routine-badge {
     background: rgba(255, 255, 255, 0.12);
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.result-title {
+.gauge-pill {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.gauge-num {
     font-size: 20px;
     font-weight: 800;
     color: #ffffff;
-    margin: 0;
-    letter-spacing: -0.4px;
 }
 
-.risk-gauge-box {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 10px;
-    padding: 10px 16px;
-    text-align: center;
-    min-width: 95px;
-}
-
-.risk-number {
-    display: block;
-    font-size: 24px;
-    font-weight: 800;
-    color: #ffffff;
-    line-height: 1;
-}
-
-.risk-label {
-    display: block;
+.gauge-sub {
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.8px;
-    color: var(--text-secondary);
-    margin-top: 4px;
+    letter-spacing: 0.6px;
+    color: #a1a1aa;
 }
 
-.protocol-box {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 16px;
+.card-main-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.4px;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
-.protocol-title {
-    font-size: 11.5px;
+.card-subtitle {
+    font-size: 13px;
+    color: #a1a1aa;
+    margin-bottom: 16px;
+}
+
+.inner-protocol-box {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 14px;
+    padding: 16px 18px;
+    width: 100%;
+}
+
+.protocol-header {
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.7px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: var(--text-secondary);
+    color: #a1a1aa;
+    margin-bottom: 12px;
+}
+
+.protocol-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     margin-bottom: 10px;
 }
 
-.protocol-list {
-    margin: 0;
-    padding-left: 18px;
-    color: #ffffff;
-    font-size: 13.5px;
-    line-height: 1.6;
+.protocol-item:last-child {
+    margin-bottom: 0;
 }
 
-.protocol-list li {
-    margin-bottom: 8px;
+.step-num {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.step-desc {
+    color: #e4e4e7;
+    font-size: 13px;
+    line-height: 1.55;
+    word-break: break-word;
 }
 
 /* Audit & Explanation Cards */
-.glass-audit-card {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: 12px !important;
-    padding: 16px 18px !important;
+.audit-card {
+    background: rgba(255, 255, 255, 0.035) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 16px !important;
+    padding: 18px 20px !important;
     margin-bottom: 14px !important;
+    width: 100% !important;
 }
 
-.highlight-border {
+.highlight-audit {
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    background: rgba(255, 255, 255, 0.045) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
-.audit-badge {
+.audit-tag {
     font-size: 10.5px;
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: var(--text-secondary);
+    color: #a1a1aa;
     margin-bottom: 6px;
 }
 
-.audit-heading {
-    font-size: 14.5px;
+.audit-title {
+    font-size: 15px;
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 6px;
+    word-break: break-word;
 }
 
-.audit-body {
+.audit-text {
     font-size: 13px;
     color: #d4d4d8;
     line-height: 1.55;
+    margin: 0;
+    word-break: break-word;
 }
 
-.factors-list {
+.driver-list {
     margin: 0;
     padding-left: 18px;
     color: #e4e4e7;
@@ -510,18 +560,22 @@ body, gradio-app, .gradio-container {
     line-height: 1.6;
 }
 
-.factors-list li {
+.driver-list li {
     margin-bottom: 6px;
+    word-break: break-word;
+}
+
+.driver-list li:last-child {
+    margin-bottom: 0;
 }
 
 /* Form Controls & Inputs */
 div.block, div.box, .gradio-block {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--border-subtle) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 12px !important;
 }
 
-/* Clear Badges & Set Clean Monochrome Typography */
 label span, span[data-testid="block-info"], .label-text {
     background: transparent !important;
     background-color: transparent !important;
@@ -536,7 +590,7 @@ label span, span[data-testid="block-info"], .label-text {
 
 input[type="text"], input[type="number"], select, .gr-dropdown {
     background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
     color: #ffffff !important;
     border-radius: 8px !important;
     font-size: 13.5px !important;
@@ -558,7 +612,7 @@ input[type="radio"]:checked {
     border-color: #ffffff !important;
 }
 
-/* Clean Monochrome Buttons */
+/* Buttons */
 .calculate-btn {
     background: #ffffff !important;
     color: #000000 !important;
@@ -566,8 +620,8 @@ input[type="radio"]:checked {
     font-size: 15px !important;
     letter-spacing: -0.2px !important;
     border: 1px solid #ffffff !important;
-    border-radius: 10px !important;
-    padding: 14px 20px !important;
+    border-radius: 12px !important;
+    padding: 15px 22px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     width: 100% !important;
@@ -576,7 +630,7 @@ input[type="radio"]:checked {
 
 .calculate-btn:hover {
     background: #e4e4e7 !important;
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 24px rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -584,10 +638,10 @@ input[type="radio"]:checked {
     background: rgba(255, 255, 255, 0.04) !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
-    padding: 8px 14px !important;
+    padding: 10px 14px !important;
     transition: all 0.2s ease !important;
 }
 
@@ -598,7 +652,7 @@ input[type="radio"]:checked {
 
 /* Tabs */
 button[role="tab"] {
-    color: var(--text-secondary) !important;
+    color: #a1a1aa !important;
     font-weight: 600 !important;
     font-size: 14px !important;
     border-bottom: 2px solid transparent !important;
@@ -610,17 +664,45 @@ button[role="tab"][aria-selected="true"] {
     border-bottom: 2px solid #ffffff !important;
 }
 
+/* Fix Tab 2 Images - Remove Overlapping Label Banners */
+.audit-image-box {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+    margin-bottom: 18px !important;
+}
+
+.audit-image-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase;
+    color: #ffffff !important;
+    margin-bottom: 12px !important;
+}
+
+.gradio-image, .image-container, .image-frame {
+    background: transparent !important;
+    border: none !important;
+}
+
+.image-container img {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
 .footer-bar {
     text-align: center;
     font-size: 12px;
-    color: var(--text-tertiary);
+    color: #71717a;
     margin-top: 40px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 """
 
-# Base Theme strictly Black & White
+# Base Monochrome Theme
 monochrome_theme = gr.themes.Base(
     primary_hue=gr.themes.colors.zinc,
     secondary_hue=gr.themes.colors.zinc,
@@ -648,8 +730,8 @@ monochrome_theme = gr.themes.Base(
     input_border_color_dark="rgba(255, 255, 255, 0.12)",
 )
 
-# Compute Initial State so the interface opens fully populated (NO BLANK BOXES)
-INIT_VALS = PRESETS["case_2"]  # Default to Case 2: Borderline Rescue to demonstrate innovation immediately
+# Compute Initial State so the interface opens fully populated
+INIT_VALS = PRESETS["case_2"]
 init_triage_html, init_comp_html, init_factors_html, init_risk = predict_cardiac_triage(*INIT_VALS)
 
 
@@ -663,19 +745,19 @@ with gr.Blocks(title="CardioTriage: Clinical Triage DSS") as demo:
 
     # Master Header
     gr.HTML("""
-    <div class="app-header">
+    <div class="app-header-box">
         <div>
-            <h1 class="brand-title">CardioTriage</h1>
-            <p class="brand-subtitle">
+            <h1 class="brand-main">CardioTriage</h1>
+            <p class="brand-desc">
                 Cost-Sensitive Cardiac Triage & Cross-Hospital Generalization System for Frontline Rural Healthcare
             </p>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
-            <span class="tag-badge">AI + Health Track</span>
-            <span class="tag-badge">Veritas AI 2026</span>
+            <span class="header-meta-pill">AI + Health Track</span>
+            <span class="header-meta-pill">Veritas AI 2026</span>
         </div>
     </div>
-    <div class="regulatory-bar">
+    <div class="regulatory-pill">
         <strong>REGULATORY PROTOTYPE NOTICE:</strong> Academic decision-support proof-of-concept exploring asymmetric loss calibration (&tau;* = 0.31) and domain-shift mitigation. Not direct medical advice.
     </div>
     """)
@@ -687,72 +769,69 @@ with gr.Blocks(title="CardioTriage: Clinical Triage DSS") as demo:
             # Interactive Quick-Load Presets Bar
             with gr.Row():
                 with gr.Column(scale=12):
-                    gr.HTML("<div class='preset-header-text'>Quick-Load Representative Patient Scenarios:</div>")
+                    gr.HTML("<div class='preset-title-label'>Quick-Load Representative Patient Scenarios:</div>")
                     with gr.Row():
                         btn_case1 = gr.Button("Case 1: Confirmed Acute (65M)", elem_classes="preset-btn")
                         btn_case2 = gr.Button("Case 2: Borderline Rescue (56F)", elem_classes="preset-btn")
                         btn_case3 = gr.Button("Case 3: Ambulatory Routine (42F)", elem_classes="preset-btn")
 
             with gr.Row():
-                # LEFT COLUMN: INTAKE PARAMETERS
+                # LEFT COLUMN: INTAKE PARAMETERS (Clean, structured cards with rounded corners)
                 with gr.Column(scale=6):
                     
-                    with gr.Group():
-                        gr.HTML("<div class='section-label'>1. Demographics & Baseline Vitals</div>")
-                        with gr.Row():
-                            age_input = gr.Slider(minimum=25, maximum=85, value=INIT_VALS[0], step=1, label="Patient Age (years)")
-                            sex_input = gr.Radio(choices=["Male", "Female"], value=INIT_VALS[1], label="Biological Sex")
-                        with gr.Row():
-                            trestbps_input = gr.Slider(minimum=80, maximum=210, value=INIT_VALS[3], step=1, label="Resting Blood Pressure (mm Hg)")
-                            chol_input = gr.Slider(minimum=100, maximum=550, value=INIT_VALS[4], step=5, label="Serum Cholesterol (mg/dl)")
+                    gr.HTML("<div class='card-title-label'>1. Demographics & Baseline Vitals</div>")
+                    with gr.Row():
+                        age_input = gr.Slider(minimum=25, maximum=85, value=INIT_VALS[0], step=1, label="Patient Age (years)")
+                        sex_input = gr.Radio(choices=["Male", "Female"], value=INIT_VALS[1], label="Biological Sex")
+                    with gr.Row():
+                        trestbps_input = gr.Slider(minimum=80, maximum=210, value=INIT_VALS[3], step=1, label="Resting Blood Pressure (mm Hg)")
+                        chol_input = gr.Slider(minimum=100, maximum=550, value=INIT_VALS[4], step=5, label="Serum Cholesterol (mg/dl)")
 
-                    with gr.Group():
-                        gr.HTML("<div class='section-label'>2. Symptoms & Exercise Stress Response</div>")
-                        cp_input = gr.Dropdown(
-                            choices=[
-                                "Typical Angina (1)",
-                                "Atypical Angina (2)",
-                                "Non-Anginal Chest Pain (3)",
-                                "Asymptomatic / Silent Ischemia (4)"
-                            ],
-                            value=INIT_VALS[2],
-                            label="Chest Pain Presentation (Angina Type)"
+                    gr.HTML("<div class='card-title-label' style='margin-top: 14px;'>2. Symptoms & Exercise Stress Response</div>")
+                    cp_input = gr.Dropdown(
+                        choices=[
+                            "Typical Angina (1)",
+                            "Atypical Angina (2)",
+                            "Non-Anginal Chest Pain (3)",
+                            "Asymptomatic / Silent Ischemia (4)"
+                        ],
+                        value=INIT_VALS[2],
+                        label="Chest Pain Presentation (Angina Type)"
+                    )
+                    with gr.Row():
+                        thalach_input = gr.Slider(minimum=60, maximum=210, value=INIT_VALS[7], step=1, label="Max Heart Rate Achieved (bpm)")
+                        oldpeak_input = gr.Slider(minimum=0.0, maximum=6.2, value=INIT_VALS[9], step=0.1, label="ST Depression Induced by Exercise (mm)")
+                    with gr.Row():
+                        exang_input = gr.Radio(choices=["Yes", "No"], value=INIT_VALS[8], label="Exercise-Induced Angina")
+                        fbs_input = gr.Radio(choices=["No (<=120 mg/dl)", "Yes (>120 mg/dl)"], value=INIT_VALS[5], label="Fasting Blood Sugar > 120 mg/dl")
+
+                    gr.HTML("<div class='card-title-label' style='margin-top: 14px;'>3. Secondary Clinical Diagnostics (Optional)</div>")
+                    with gr.Row():
+                        restecg_input = gr.Dropdown(
+                            choices=["Normal (0)", "ST-T Wave Abnormality (1)", "Left Ventricular Hypertrophy (2)"],
+                            value=INIT_VALS[6],
+                            label="Resting Electrocardiogram (ECG)"
                         )
-                        with gr.Row():
-                            thalach_input = gr.Slider(minimum=60, maximum=210, value=INIT_VALS[7], step=1, label="Max Heart Rate Achieved (bpm)")
-                            oldpeak_input = gr.Slider(minimum=0.0, maximum=6.2, value=INIT_VALS[9], step=0.1, label="ST Depression Induced by Exercise (mm)")
-                        with gr.Row():
-                            exang_input = gr.Radio(choices=["Yes", "No"], value=INIT_VALS[8], label="Exercise-Induced Angina")
-                            fbs_input = gr.Radio(choices=["No (<=120 mg/dl)", "Yes (>120 mg/dl)"], value=INIT_VALS[5], label="Fasting Blood Sugar > 120 mg/dl")
-
-                    with gr.Group():
-                        gr.HTML("<div class='section-label'>3. Secondary Clinical Diagnostics (Optional)</div>")
-                        with gr.Row():
-                            restecg_input = gr.Dropdown(
-                                choices=["Normal (0)", "ST-T Wave Abnormality (1)", "Left Ventricular Hypertrophy (2)"],
-                                value=INIT_VALS[6],
-                                label="Resting Electrocardiogram (ECG)"
-                            )
-                            slope_input = gr.Dropdown(
-                                choices=["Upsloping (1)", "Flat (2)", "Downsloping (3)"],
-                                value=INIT_VALS[10],
-                                label="Peak Exercise ST Slope"
-                            )
-                        with gr.Row():
-                            ca_input = gr.Dropdown(
-                                choices=["0", "1", "2", "3"],
-                                value=INIT_VALS[11],
-                                label="Major Vessels via Fluoroscopy (ca) [0 if unavailable]"
-                            )
-                            thal_input = gr.Dropdown(
-                                choices=["Normal (3)", "Fixed Defect (6)", "Reversible Defect (7)"],
-                                value=INIT_VALS[12],
-                                label="Thallium Nuclear Scan [Normal if unavailable]"
-                            )
+                        slope_input = gr.Dropdown(
+                            choices=["Upsloping (1)", "Flat (2)", "Downsloping (3)"],
+                            value=INIT_VALS[10],
+                            label="Peak Exercise ST Slope"
+                        )
+                    with gr.Row():
+                        ca_input = gr.Dropdown(
+                            choices=["0", "1", "2", "3"],
+                            value=INIT_VALS[11],
+                            label="Major Vessels via Fluoroscopy (ca) [0 if unavailable]"
+                        )
+                        thal_input = gr.Dropdown(
+                            choices=["Normal (3)", "Fixed Defect (6)", "Reversible Defect (7)"],
+                            value=INIT_VALS[12],
+                            label="Thallium Nuclear Scan [Normal if unavailable]"
+                        )
 
                     triage_btn = gr.Button("Calculate Clinical Triage Decision", elem_classes="calculate-btn")
 
-                # RIGHT COLUMN: TRIAGE RESULTS & DECISION SUPPORT (Pre-populated on load)
+                # RIGHT COLUMN: TRIAGE RESULTS & DECISION SUPPORT (Properly enclosed glass cards)
                 with gr.Column(scale=6):
                     triage_badge_output = gr.HTML(value=init_triage_html)
                     comparison_output = gr.HTML(value=init_comp_html)
@@ -812,7 +891,7 @@ with gr.Blocks(title="CardioTriage: Clinical Triage DSS") as demo:
                 outputs=all_inputs + all_outputs
             )
 
-        # TAB 2: AUDIT & EXPLAINABILITY
+        # TAB 2: AUDIT & EXPLAINABILITY (Cleanly Framed Without Overlapping Labels)
         with gr.Tab("Multi-Hospital OOD & Explainability Audit"):
             gr.HTML("""
             <div style="padding: 10px 0 20px 0;">
@@ -828,25 +907,31 @@ with gr.Blocks(title="CardioTriage: Clinical Triage DSS") as demo:
             
             with gr.Row():
                 with gr.Column():
-                    gr.HTML("<div class='section-label'>1. Cross-Hospital Out-of-Distribution Generalization</div>")
-                    gr.Image(value=os.path.join(OUTPUTS_DIR, "ood_generalization_audit.png"), label="OOD Generalization (4 Cohorts, N=920)")
+                    gr.HTML("<div class='audit-image-title'>1. Cross-Hospital Out-of-Distribution Generalization</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "ood_generalization_audit.png"), show_label=False)
                 with gr.Column():
-                    gr.HTML("<div class='section-label'>2. Subgroup Demographic Fairness Audit</div>")
-                    gr.Image(value=os.path.join(OUTPUTS_DIR, "subgroup_fairness_audit.png"), label="Subgroup Parity: Sex & Age")
+                    gr.HTML("<div class='audit-image-title'>2. Subgroup Demographic Fairness Audit</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "subgroup_fairness_audit.png"), show_label=False)
 
             with gr.Row():
                 with gr.Column():
-                    gr.HTML("<div class='section-label'>3. Asymmetric Cost-Sensitive Threshold Curve</div>")
-                    gr.Image(value=os.path.join(OUTPUTS_DIR, "cost_threshold_optimization_curve.png"), label="Loss Surface & Threshold Optimization")
+                    gr.HTML("<div class='audit-image-title' style='margin-top: 14px;'>3. Asymmetric Cost-Sensitive Threshold Curve</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "cost_threshold_optimization_curve.png"), show_label=False)
                 with gr.Column():
-                    gr.HTML("<div class='section-label'>4. Global Feature Attribution (TreeSHAP)</div>")
-                    gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_global_summary.png"), label="Global SHAP Summary")
+                    gr.HTML("<div class='audit-image-title' style='margin-top: 14px;'>4. Global Feature Attribution (TreeSHAP)</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_global_summary.png"), show_label=False)
 
-            gr.HTML("<div class='section-label' style='margin-top: 20px;'>5. Local Clinical Case Forensics (SHAP Waterfall Plots)</div>")
+            gr.HTML("<div class='audit-image-title' style='margin-top: 24px;'>5. Local Clinical Case Forensics (SHAP Waterfall Plots)</div>")
             with gr.Row():
-                gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_true_positive.png"), label="True Positive: Acute Ischemia")
-                gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_triage_rescue.png"), label="Triage Rescue: Rescued False Negative")
-                gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_false_alarm.png"), label="False Alarm: Atypical Presentation")
+                with gr.Column():
+                    gr.HTML("<div class='audit-image-title' style='font-size: 12px; color: #a1a1aa;'>True Positive: Acute Ischemia</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_true_positive.png"), show_label=False)
+                with gr.Column():
+                    gr.HTML("<div class='audit-image-title' style='font-size: 12px; color: #a1a1aa;'>Triage Rescue: Rescued False Negative</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_triage_rescue.png"), show_label=False)
+                with gr.Column():
+                    gr.HTML("<div class='audit-image-title' style='font-size: 12px; color: #a1a1aa;'>False Alarm: Atypical Presentation</div>")
+                    gr.Image(value=os.path.join(OUTPUTS_DIR, "shap_case_false_alarm.png"), show_label=False)
 
     gr.HTML("""
     <div class="footer-bar">
